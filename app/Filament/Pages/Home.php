@@ -11,9 +11,7 @@ class Home extends Page
 {
     protected static ?string $navigationIcon = 'heroicon-o-chart-pie';
 
-    protected static string $view = 'filament.pages.Home';
-
-    protected static ?string $navigationGroup = 'الاحصائيات';
+    protected static string $view = 'filament.pages.home';
 
     protected static ?string $title = 'الرئيسية';
 

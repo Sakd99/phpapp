@@ -12,21 +12,18 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // إنشاء 10 مستخدمين باستخدام المصنع
         User::factory(10)->create();
 
-        // إنشاء مستخدم اختباري
         User::factory()->create([
             'name' => 'admin',
             'email' => 'super@mail.com',
-            'password' => bcrypt('password'), // تأكد من تعيين كلمة مرور مشفرة
+            'password' => bcrypt('password'),
         ]);
 
-        // إنشاء مستخدم إضافي
         User::factory()->create([
-            'name' => 'New User',
-            'email' => 'newuser@example.com',
-            'password' => bcrypt('password'), // تعيين كلمة مرور مشفرة
+            'name' => 'zz',
+            'email' => 'z@z.com',
+            'password' => bcrypt('password'),
         ]);
     }
 }

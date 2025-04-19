@@ -31,15 +31,33 @@ class AdminPanelProvider extends PanelProvider
             ->id('admin')
             ->path('/')
             ->login()
-            ->colors(
-                [
-                    'primary' => Color::hex('#5755FE'),
-                ]
-            )
+            ->colors([
+                'primary' => Color::hex('#5755FE'),
+                'secondary' => Color::hex('#7AA2E3'),
+                'success' => Color::hex('#10B981'),
+                'warning' => Color::hex('#F59E0B'),
+                'danger' => Color::hex('#EF4444'),
+                'info' => Color::hex('#97E7E1'),
+                'gray' => Color::hex('#6B7280')
+            ])
             ->profile()
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
             ->font('Tajawal', 'https://fonts.googleapis.com/css2?family=Tajawal:wght@200;300;400;500;700;800;900&display=swap')
+            ->brandName('لوحة التحكم')
+            ->favicon(asset('favicon.ico'))
+            ->navigationGroups([
+                'إدارة المحتوى',
+                'إدارة المبيعات',
+                'إدارة المستخدمين',
+                'التقارير والإحصائيات',
+                'الإعدادات'
+            ])
+            ->globalSearchKeyBindings(['command+k', 'ctrl+k'])
+            ->topNavigation(false)
+            ->maxContentWidth('full')
+            ->darkMode(true)
+            ->sidebarCollapsibleOnDesktop()
 //            ->asset([
 //                Js::make('custom-script', 'https://maps.googleapis.com/maps/api/js?key=' . config('services.google.maps.key') . '&callback=initMap'),
 //            ])

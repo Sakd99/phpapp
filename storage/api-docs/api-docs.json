@@ -1,0 +1,902 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "Bids API",
+        "description": "API for managing bidding operations",
+        "version": "1.0.0"
+    },
+    "servers": [
+        {
+            "url": "http://my-default-host.com",
+            "description": "API Server"
+        }
+    ],
+    "paths": {
+        "/api/bids": {
+            "get": {
+                "tags": [
+                    "Bids"
+                ],
+                "summary": "Get a list of bids",
+                "description": "Retrieve a list of all bids with sorting options.",
+                "operationId": "8088e072b9acba8aee1a8e7ffce7ef74",
+                "parameters": [
+                    {
+                        "name": "sort",
+                        "in": "query",
+                        "description": "Sort direction: 'asc' or 'desc'. Default is 'desc'.",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "asc",
+                                "desc"
+                            ]
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of bids",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "product_name": {
+                                                        "type": "string",
+                                                        "example": "Product 1"
+                                                    },
+                                                    "current_price": {
+                                                        "type": "number",
+                                                        "example": 150
+                                                    },
+                                                    "product_image1": {
+                                                        "type": "string",
+                                                        "example": "https://example.com/storage/app/public/bids/image1.jpg"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        },
+                                        "sort": {
+                                            "type": "string",
+                                            "example": "desc"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No bids found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "لم يتم العثور على مزادات"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Bids"
+                ],
+                "summary": "Create a new bid",
+                "description": "Create a new bid with product details.",
+                "operationId": "ad5a579a9ee4c6b3e5001d1833f91026",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "product_name",
+                                    "product_description",
+                                    "initial_price",
+                                    "current_price",
+                                    "end_time",
+                                    "product_image1",
+                                    "category_id",
+                                    "subcategory_id",
+                                    "governorate",
+                                    "region",
+                                    "delivery_address"
+                                ],
+                                "properties": {
+                                    "product_name": {
+                                        "type": "string",
+                                        "example": "Product 1"
+                                    },
+                                    "product_description": {
+                                        "type": "string",
+                                        "example": "Product description"
+                                    },
+                                    "initial_price": {
+                                        "type": "number",
+                                        "example": 100
+                                    },
+                                    "current_price": {
+                                        "type": "number",
+                                        "example": 150
+                                    },
+                                    "end_time": {
+                                        "type": "string",
+                                        "format": "date-time",
+                                        "example": "2024-12-31 23:59:59"
+                                    },
+                                    "product_image1": {
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "category_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "subcategory_id": {
+                                        "type": "integer",
+                                        "example": 2
+                                    },
+                                    "governorate": {
+                                        "type": "string",
+                                        "example": "Cairo"
+                                    },
+                                    "region": {
+                                        "type": "string",
+                                        "example": "Nasr City"
+                                    },
+                                    "delivery_address": {
+                                        "type": "string",
+                                        "example": "123 Street Name"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Bid created successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "تم إنشاء المزاد بنجاح"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Failed to create bid",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "فشل في إنشاء المزاد"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/bids/user/{userId}": {
+            "get": {
+                "tags": [
+                    "Bids"
+                ],
+                "summary": "Get bids by user",
+                "description": "Retrieve all bids created by a specific user.",
+                "operationId": "d554ba76d4b42f84158eeceec5c75336",
+                "parameters": [
+                    {
+                        "name": "userId",
+                        "in": "path",
+                        "description": "ID of the user",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of user bids",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "id": {
+                                            "type": "integer",
+                                            "example": 1
+                                        },
+                                        "product_name": {
+                                            "type": "string",
+                                            "example": "Product 1"
+                                        },
+                                        "product_image1": {
+                                            "type": "string",
+                                            "example": "https://example.com/storage/app/public/bids/image1.jpg"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No bids found for the user",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "لم يتم العثور على مزادات لهذا المستخدم"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/bids/category/{categoryId}": {
+            "get": {
+                "tags": [
+                    "Bids"
+                ],
+                "summary": "Get bids by category",
+                "description": "Retrieve all bids under a specific category.",
+                "operationId": "abda247b0a80de295035c11bd713e347",
+                "parameters": [
+                    {
+                        "name": "categoryId",
+                        "in": "path",
+                        "description": "ID of the category",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of category bids",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "id": {
+                                            "type": "integer",
+                                            "example": 1
+                                        },
+                                        "product_name": {
+                                            "type": "string",
+                                            "example": "Product 1"
+                                        },
+                                        "product_image1": {
+                                            "type": "string",
+                                            "example": "https://example.com/storage/app/public/bids/image1.jpg"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No bids found for the category",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "لم يتم العثور على مزادات لهذه الفئة"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/categories": {
+            "get": {
+                "tags": [
+                    "Categories"
+                ],
+                "summary": "Get all categories",
+                "description": "Retrieve a list of all available categories.",
+                "operationId": "91c21e768b291c225fa9129caaaea106",
+                "responses": {
+                    "200": {
+                        "description": "List of categories",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "properties": {
+                                            "id": {
+                                                "type": "integer",
+                                                "example": 1
+                                            },
+                                            "name": {
+                                                "type": "string",
+                                                "example": "Electronics"
+                                            }
+                                        },
+                                        "type": "object"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/bids/ending-soon/{period}": {
+            "get": {
+                "tags": [
+                    "Bids"
+                ],
+                "summary": "Get bids ending soon",
+                "description": "Retrieve bids that are ending within a specified period.",
+                "operationId": "64890013a5e2ce906a01a07741284e06",
+                "parameters": [
+                    {
+                        "name": "period",
+                        "in": "path",
+                        "description": "The period to search for ending bids (e.g., '6hours', '12hours', '1day', '2days').",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of bids ending soon",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "properties": {
+                                            "id": {
+                                                "type": "integer",
+                                                "example": 1
+                                            },
+                                            "product_name": {
+                                                "type": "string",
+                                                "example": "Product 1"
+                                            },
+                                            "end_time": {
+                                                "type": "string",
+                                                "format": "date-time",
+                                                "example": "2024-12-31 23:59:59"
+                                            }
+                                        },
+                                        "type": "object"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No bids found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "لا توجد مزادات تنتهي قريبًا"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid period",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "تم تحديد فترة غير صالحة"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/bids/{id}/current-price": {
+            "put": {
+                "tags": [
+                    "Bids"
+                ],
+                "summary": "Update the current price of a bid",
+                "description": "Update the current price of a bid and store the bidder's information.",
+                "operationId": "bc1399ccbb8ed28b3b468465f4cf0927",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID of the bid",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "current_price",
+                                    "shipping_address",
+                                    "phone_id"
+                                ],
+                                "properties": {
+                                    "current_price": {
+                                        "type": "number",
+                                        "example": 200
+                                    },
+                                    "shipping_address": {
+                                        "type": "string",
+                                        "example": "123 Street Name"
+                                    },
+                                    "phone_id": {
+                                        "type": "string",
+                                        "example": "phone123"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Current price updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "تم تحديث السعر الحالي بنجاح"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "New price must be higher",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "يجب أن يكون السعر الجديد أعلى من السعر الحالي"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Bid not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "لم يتم العثور على المزاد"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Failed to update",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "فشل في تحديث السعر الحالي"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/bids/active": {
+            "get": {
+                "tags": [
+                    "Bids"
+                ],
+                "summary": "Get active bids for the authenticated user",
+                "description": "Retrieve a list of active bids created by the authenticated user.",
+                "operationId": "99945874f49c3e12c5ce13353ccb4359",
+                "responses": {
+                    "200": {
+                        "description": "List of active bids",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "properties": {
+                                            "id": {
+                                                "type": "integer",
+                                                "example": 1
+                                            },
+                                            "product_name": {
+                                                "type": "string",
+                                                "example": "Product 1"
+                                            },
+                                            "product_description": {
+                                                "type": "string",
+                                                "example": "Product description"
+                                            },
+                                            "product_image1": {
+                                                "type": "string",
+                                                "example": "https://example.com/storage/app/public/bids/image1.jpg"
+                                            },
+                                            "end_time": {
+                                                "type": "string",
+                                                "format": "date-time",
+                                                "example": "2024-12-31 23:59:59"
+                                            },
+                                            "initial_price": {
+                                                "type": "number",
+                                                "example": 100
+                                            },
+                                            "current_price": {
+                                                "type": "number",
+                                                "example": 150
+                                            }
+                                        },
+                                        "type": "object"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No active bids found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "لا توجد مزادات نشطة"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/bids/user/offers": {
+            "get": {
+                "tags": [
+                    "Bids"
+                ],
+                "summary": "Get all bid offers for the authenticated user",
+                "description": "Retrieve all bid offers made by the authenticated user.",
+                "operationId": "c8a216b1b27ac45d339c2da95e194edb",
+                "responses": {
+                    "200": {
+                        "description": "List of user bid offers",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "properties": {
+                                            "bid_id": {
+                                                "type": "integer",
+                                                "example": 1
+                                            },
+                                            "product_name": {
+                                                "type": "string",
+                                                "example": "Product 1"
+                                            },
+                                            "initial_price": {
+                                                "type": "number",
+                                                "example": 100
+                                            },
+                                            "current_price": {
+                                                "type": "number",
+                                                "example": 150
+                                            },
+                                            "end_time": {
+                                                "type": "string",
+                                                "format": "date-time",
+                                                "example": "2024-12-31 23:59:59"
+                                            },
+                                            "highest_offer": {
+                                                "properties": {
+                                                    "buyer_name": {
+                                                        "type": "string",
+                                                        "example": "User 1"
+                                                    },
+                                                    "buyer_phone": {
+                                                        "type": "string",
+                                                        "example": "123456789"
+                                                    },
+                                                    "offered_price": {
+                                                        "type": "number",
+                                                        "example": 200
+                                                    },
+                                                    "shipping_address": {
+                                                        "type": "string",
+                                                        "example": "123 Street Name"
+                                                    },
+                                                    "phone_id": {
+                                                        "type": "string",
+                                                        "example": "phone123"
+                                                    },
+                                                    "bidder_id": {
+                                                        "type": "integer",
+                                                        "example": 2
+                                                    }
+                                                },
+                                                "type": "object"
+                                            },
+                                            "status": {
+                                                "type": "string",
+                                                "example": "pending"
+                                            }
+                                        },
+                                        "type": "object"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No offers found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "لم يتم العثور على عروض للمزايدات الخاصة بك"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/bids/{bidId}/respond/{bidderId}": {
+            "post": {
+                "tags": [
+                    "Bids"
+                ],
+                "summary": "Respond to a bid offer",
+                "description": "Accept or reject a bid offer.",
+                "operationId": "7936d92af18865569fd15b9458e85b65",
+                "parameters": [
+                    {
+                        "name": "bidId",
+                        "in": "path",
+                        "description": "ID of the bid",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "bidderId",
+                        "in": "path",
+                        "description": "ID of the bidder",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "response"
+                                ],
+                                "properties": {
+                                    "response": {
+                                        "type": "string",
+                                        "enum": [
+                                            "accept",
+                                            "reject"
+                                        ]
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Response to bid offer",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "تم قبول العرض بنجاح وإنهاء المزاد"
+                                        },
+                                        "bid_details": {
+                                            "properties": {
+                                                "product_name": {
+                                                    "type": "string",
+                                                    "example": "Product 1"
+                                                },
+                                                "product_image": {
+                                                    "type": "string",
+                                                    "example": "https://example.com/storage/app/public/bids/image1.jpg"
+                                                },
+                                                "buyer_bid_amount": {
+                                                    "type": "number",
+                                                    "example": 200
+                                                },
+                                                "initial_price": {
+                                                    "type": "number",
+                                                    "example": 100
+                                                },
+                                                "current_price": {
+                                                    "type": "number",
+                                                    "example": 200
+                                                },
+                                                "shipping_address": {
+                                                    "type": "string",
+                                                    "example": "123 Street Name"
+                                                },
+                                                "seller_name": {
+                                                    "type": "string",
+                                                    "example": "Seller 1"
+                                                },
+                                                "seller_phone": {
+                                                    "type": "string",
+                                                    "example": "123456789"
+                                                },
+                                                "status": {
+                                                    "type": "string",
+                                                    "example": "مقبول (قيد التوصيل)"
+                                                },
+                                                "end_time": {
+                                                    "type": "string",
+                                                    "format": "date-time",
+                                                    "example": "2024-12-31 23:59:59"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Bid not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "لم يتم العثور على المزايدة"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "Bids",
+            "description": "Bids"
+        },
+        {
+            "name": "Categories",
+            "description": "Categories"
+        }
+    ],
+    "security": [
+        {
+            "bearerAuth": []
+        }
+    ]
+}
