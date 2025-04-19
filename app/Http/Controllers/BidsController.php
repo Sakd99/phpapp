@@ -112,10 +112,10 @@ class BidsController extends Controller
             ->get();
 
         foreach ($bids as $bid) {
-            // تعديل مسارات الصور - تخزين المسار كما هو بدون إضافات
-            $bid->product_image1_url = $bid->product_image1 ? asset('storage/' . $bid->product_image1) : null;
-            $bid->product_image2_url = $bid->product_image2 ? asset('storage/' . $bid->product_image2) : null;
-            $bid->product_image3_url = $bid->product_image3 ? asset('storage/' . $bid->product_image3) : null;
+            // تحديث مسارات الصور
+            if (!empty($bid->product_image1)) {
+                $bid->product_image1 = asset('storage/app/public/' . $bid->product_image1);
+            }
 
             // تضمين معلومات المستخدم الذي قام بإنشاء المزايدة
             $bid->user_info = $bid->user ? [
@@ -135,6 +135,9 @@ class BidsController extends Controller
             // تضمين الألوان والأحجام المتاحة
             $bid->available_colors_text = is_array($bid->available_colors) ? implode(', ', $bid->available_colors) : null;
             $bid->available_sizes_text = is_array($bid->available_sizes) ? implode(', ', $bid->available_sizes) : null;
+
+            // لا حاجة لإعادة تعيين parent_id، لأنه موجود بالفعل في النموذج
+            // وستتم إعادته تلقائيًا في استجابة JSON
         }
 
         return response()->json([
@@ -381,22 +384,41 @@ class BidsController extends Controller
                 return response()->json(['message' => 'لم يتم العثور على مزادات لهذا المستخدم'], 404);
             }
             foreach ($bids as $bid) {
-                // تعديل مسارات الصور لتعمل بشكل صحيح باستخدام المسار الصحيح
+                // تعديل مسارات الصور لتعمل بشكل صحيح على سي بانل
                 if (!empty($bid->product_image1)) {
-                    // إستخدام العنوان الكامل للصورة بالطريقة الصحيحة
-                    $bid->product_image1 = asset('storage/' . $bid->product_image1);
+                    if (str_starts_with($bid->product_image1, '/storage/')) {
+                        $bid->product_image1 = asset(substr($bid->product_image1, 1));
+                    } else {
+                        $bid->product_image1 = asset('storage/' . $bid->product_image1);
+                    }
                 }
                 if (!empty($bid->product_image2)) {
-                    $bid->product_image2 = asset('storage/' . $bid->product_image2);
+                    if (str_starts_with($bid->product_image2, '/storage/')) {
+                        $bid->product_image2 = asset(substr($bid->product_image2, 1));
+                    } else {
+                        $bid->product_image2 = asset('storage/' . $bid->product_image2);
+                    }
                 }
                 if (!empty($bid->product_image3)) {
-                    $bid->product_image3 = asset('storage/' . $bid->product_image3);
+                    if (str_starts_with($bid->product_image3, '/storage/')) {
+                        $bid->product_image3 = asset(substr($bid->product_image3, 1));
+                    } else {
+                        $bid->product_image3 = asset('storage/' . $bid->product_image3);
+                    }
                 }
                 if (!empty($bid->product_image4)) {
-                    $bid->product_image4 = asset('storage/' . $bid->product_image4);
+                    if (str_starts_with($bid->product_image4, '/storage/')) {
+                        $bid->product_image4 = asset(substr($bid->product_image4, 1));
+                    } else {
+                        $bid->product_image4 = asset('storage/' . $bid->product_image4);
+                    }
                 }
                 if (!empty($bid->product_image5)) {
-                    $bid->product_image5 = asset('storage/' . $bid->product_image5);
+                    if (str_starts_with($bid->product_image5, '/storage/')) {
+                        $bid->product_image5 = asset(substr($bid->product_image5, 1));
+                    } else {
+                        $bid->product_image5 = asset('storage/' . $bid->product_image5);
+                    }
                 }
 
                 // تضمين خيار التوصيل في الاستجابة
@@ -420,22 +442,41 @@ class BidsController extends Controller
                 return response()->json(['message' => 'لم يتم العثور على مزادات لهذه الفئة'], 404);
             }
             foreach ($bids as $bid) {
-                // تعديل مسارات الصور لتعمل بشكل صحيح باستخدام المسار الصحيح
+                // تعديل مسارات الصور لتعمل بشكل صحيح على سي بانل
                 if (!empty($bid->product_image1)) {
-                    // إستخدام العنوان الكامل للصورة بالطريقة الصحيحة
-                    $bid->product_image1 = asset('storage/' . $bid->product_image1);
+                    if (str_starts_with($bid->product_image1, '/storage/')) {
+                        $bid->product_image1 = asset(substr($bid->product_image1, 1));
+                    } else {
+                        $bid->product_image1 = asset('storage/' . $bid->product_image1);
+                    }
                 }
                 if (!empty($bid->product_image2)) {
-                    $bid->product_image2 = asset('storage/' . $bid->product_image2);
+                    if (str_starts_with($bid->product_image2, '/storage/')) {
+                        $bid->product_image2 = asset(substr($bid->product_image2, 1));
+                    } else {
+                        $bid->product_image2 = asset('storage/' . $bid->product_image2);
+                    }
                 }
                 if (!empty($bid->product_image3)) {
-                    $bid->product_image3 = asset('storage/' . $bid->product_image3);
+                    if (str_starts_with($bid->product_image3, '/storage/')) {
+                        $bid->product_image3 = asset(substr($bid->product_image3, 1));
+                    } else {
+                        $bid->product_image3 = asset('storage/' . $bid->product_image3);
+                    }
                 }
                 if (!empty($bid->product_image4)) {
-                    $bid->product_image4 = asset('storage/' . $bid->product_image4);
+                    if (str_starts_with($bid->product_image4, '/storage/')) {
+                        $bid->product_image4 = asset(substr($bid->product_image4, 1));
+                    } else {
+                        $bid->product_image4 = asset('storage/' . $bid->product_image4);
+                    }
                 }
                 if (!empty($bid->product_image5)) {
-                    $bid->product_image5 = asset('storage/' . $bid->product_image5);
+                    if (str_starts_with($bid->product_image5, '/storage/')) {
+                        $bid->product_image5 = asset(substr($bid->product_image5, 1));
+                    } else {
+                        $bid->product_image5 = asset('storage/' . $bid->product_image5);
+                    }
                 }
 
                 // تضمين الألوان والأحجام المتاحة
@@ -532,9 +573,13 @@ class BidsController extends Controller
             ->get(['id', 'product_name', 'product_description', 'product_image1', 'end_time', 'initial_price', 'current_price']);
 
         foreach ($bids as $bid) {
-            // تعديل مسار الصورة ليعمل بشكل صحيح
+            // تعديل مسار الصورة ليعمل بشكل صحيح على سي بانل
             if (!empty($bid->product_image1)) {
-                $bid->product_image1 = asset('storage/' . $bid->product_image1);
+                if (str_starts_with($bid->product_image1, '/storage/')) {
+                    $bid->product_image1 = asset(substr($bid->product_image1, 1));
+                } else {
+                    $bid->product_image1 = asset('storage/' . $bid->product_image1);
+                }
             }
         }
 
@@ -627,10 +672,14 @@ class BidsController extends Controller
             return response()->json(['message' => 'فشل في تحديث حالة المزايدة'], 500);
         }
 
-        // تعديل مسار الصورة ليعمل بشكل صحيح
+        // تعديل مسار الصورة ليعمل بشكل صحيح على سي بانل
         $productImage = '';
         if (!empty($bid->product_image1)) {
-            $productImage = asset('storage/' . $bid->product_image1);
+            if (str_starts_with($bid->product_image1, '/storage/')) {
+                $productImage = asset(substr($bid->product_image1, 1));
+            } else {
+                $productImage = asset('storage/' . $bid->product_image1);
+            }
         }
 
         $bidDetails = [
@@ -674,10 +723,14 @@ class BidsController extends Controller
         $bidDetails = $bids->map(function($bid) use ($user) {
             $buyerBid = $bid->bidders->first();
 
-            // تعديل مسار الصورة ليعمل بشكل صحيح
+            // تعديل مسار الصورة ليعمل بشكل صحيح على سي بانل
             $productImage = '';
             if (!empty($bid->product_image1)) {
-                $productImage = asset('storage/' . $bid->product_image1);
+                if (str_starts_with($bid->product_image1, '/storage/')) {
+                    $productImage = asset(substr($bid->product_image1, 1));
+                } else {
+                    $productImage = asset('storage/' . $bid->product_image1);
+                }
             }
 
             return [
@@ -728,9 +781,13 @@ class BidsController extends Controller
             ->get(['id', 'product_name', 'product_description', 'product_image1', 'end_time', 'initial_price', 'current_price']);
 
         $activeBids = $activeBids->map(function ($bid) {
-            // تعديل مسار الصورة ليعمل بشكل صحيح
+            // تعديل مسار الصورة ليعمل بشكل صحيح على سي بانل
             if (!empty($bid->product_image1)) {
-                $bid->product_image1 = asset('storage/' . $bid->product_image1);
+                if (str_starts_with($bid->product_image1, '/storage/')) {
+                    $bid->product_image1 = asset(substr($bid->product_image1, 1));
+                } else {
+                    $bid->product_image1 = asset('storage/' . $bid->product_image1);
+                }
             }
             $bid->user_bid_amount = $bid->bidders->first()->pivot->bid_amount;
             unset($bid->bidders);

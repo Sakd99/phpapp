@@ -7,7 +7,7 @@
         <div class="relative overflow-hidden rounded-lg shadow-md">
             @php
                 // تعديل مسار الصورة ليعمل بشكل صحيح - استخدام المسار المباشر
-                $imageUrl = asset('storage/' . $record->product_image1);
+                $imageUrl = asset('storage/app/public/' . $record->product_image1);
             @endphp
             <img src="{{ $imageUrl }}" alt="صورة المنتج 1" class="w-full h-64 object-cover">
             <div class="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white p-2 text-center">
@@ -20,7 +20,7 @@
         <div class="relative overflow-hidden rounded-lg shadow-md">
             @php
                 // تعديل مسار الصورة ليعمل بشكل صحيح - استخدام المسار المباشر
-                $imageUrl = asset('storage/' . $record->product_image2);
+                $imageUrl = asset('storage/app/public/' . $record->product_image2);
             @endphp
             <img src="{{ $imageUrl }}" alt="صورة المنتج 2" class="w-full h-64 object-cover">
             <div class="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white p-2 text-center">
@@ -33,7 +33,7 @@
         <div class="relative overflow-hidden rounded-lg shadow-md">
             @php
                 // تعديل مسار الصورة ليعمل بشكل صحيح - استخدام المسار المباشر
-                $imageUrl = asset('storage/' . $record->product_image3);
+                $imageUrl = asset('storage/app/public/' . $record->product_image3);
             @endphp
             <img src="{{ $imageUrl }}" alt="صورة المنتج 3" class="w-full h-64 object-cover">
             <div class="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white p-2 text-center">

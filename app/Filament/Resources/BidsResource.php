@@ -226,8 +226,8 @@ class BidsResource extends Resource
                         if (empty($state)) return 'لا توجد صورة';
 
                         // تعديل مسار الصورة ليعمل بشكل صحيح على سي بانل
-                        // استخدام المسار المباشر مع إضافة "storage" فقط
-                        $imageUrl = asset('storage/' . $state);
+                        // استخدام المسار المباشر مع إضافة "storage/app/public"
+                        $imageUrl = asset('storage/app/public/' . $state);
 
                         return '<img src="' . $imageUrl . '" alt="صورة المنتج" class="w-20 h-20 object-cover rounded-lg">';
                     })
