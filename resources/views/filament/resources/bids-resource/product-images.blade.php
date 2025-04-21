@@ -49,28 +49,36 @@
     </div>
 @endif
 
-<div class="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
-    @if(isset($record->available_colors) && count($record->available_colors) > 0)
-        <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm">
-            <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2">الألوان المتاحة</h3>
-            <div class="flex flex-wrap gap-2">
-                @foreach($record->available_colors as $color)
-                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-primary-100 text-primary-800 dark:bg-primary-900 dark:text-primary-200">
-                        {{ $color }}
-                    </span>
-                @endforeach
-            </div>
-        </div>
-    @endif
+<div class="mt-8 grid grid-cols-1 gap-6">
+    @php
+        $propertiesData = $record->properties_data;
+        $properties = \App\Models\Property::whereIn('id', array_keys($propertiesData ?? []))->get();
+    @endphp
 
-    @if(isset($record->available_sizes) && count($record->available_sizes) > 0)
+    @if(count($propertiesData) > 0)
         <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm">
-            <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2">الأحجام المتاحة</h3>
-            <div class="flex flex-wrap gap-2">
-                @foreach($record->available_sizes as $size)
-                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-success-100 text-success-800 dark:bg-success-900 dark:text-success-200">
-                        {{ $size }}
-                    </span>
+            <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4">خصائص المنتج</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                @foreach($properties as $property)
+                    <div class="border-b border-gray-200 dark:border-gray-700 pb-3">
+                        <div class="text-sm font-medium text-gray-500 dark:text-gray-400">
+                            {{ $property->name }}:
+                        </div>
+                        <div class="mt-1 text-base font-semibold text-gray-900 dark:text-white">
+                            @php
+                                $value = $propertiesData[$property->id] ?? null;
+
+                                // إذا كانت القيمة مصفوفة (للقوائم متعددة الاختيارات)
+                                if (is_array($value)) {
+                                    echo implode(', ', $value);
+                                } elseif ($property->type === 'boolean') {
+                                    echo $value ? 'نعم' : 'لا';
+                                } else {
+                                    echo $value;
+                                }
+                            @endphp
+                        </div>
+                    </div>
                 @endforeach
             </div>
         </div>

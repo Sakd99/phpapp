@@ -22,6 +22,12 @@ class BidsController extends Controller
 
     public function store(Request $request)
     {
+        // إضافة قيمة افتراضية لمنشأ المنتج إذا لم يتم توفيرها
+        if (!$request->has('product_origin')) {
+            $request->merge(['product_origin' => 'العراق']);
+        }
+
+        // التحقق من البيانات الأساسية
         $validatedData = $request->validate([
             'product_name' => 'required|string|max:255',
             'product_description' => 'required|string',
@@ -41,10 +47,28 @@ class BidsController extends Controller
             'delivery_address' => 'required|string|max:255',
             'shipping_option' => 'required|in:seller,buyer',
             'product_condition' => 'required|in:new,used',
+            'product_origin' => 'required|string|max:255',
             'fcm_token' => 'required|string|max:255', // جعل الحقل مطلوبًا
             'available_colors' => 'nullable|array',
             'available_sizes' => 'nullable|array',
+            'properties_data' => 'nullable|array', // بيانات الخصائص
         ]);
+
+        // التحقق من الخصائص المطلوبة
+        $requiredProperties = \App\Models\Property::where('is_active', true)
+            ->where('is_required', true)
+            ->get();
+
+        $propertiesData = $request->input('properties_data', []);
+
+        foreach ($requiredProperties as $property) {
+            if (!isset($propertiesData[$property->id]) || empty($propertiesData[$property->id])) {
+                return response()->json([
+                    'message' => 'الخاصية "' . $property->name . '" مطلوبة',
+                    'property_id' => $property->id
+                ], 422);
+            }
+        }
 
         try {
             $bid = new Bids();
@@ -78,14 +102,45 @@ class BidsController extends Controller
             $bid->parent_id = $validatedData['parent_id']; // حفظ parent_id
             $bid->shipping_option = $validatedData['shipping_option'];
             $bid->product_condition = $validatedData['product_condition'];
+            $bid->product_origin = $validatedData['product_origin'];
+
+            // حفظ بيانات الخصائص
+            if (isset($validatedData['properties_data']) && is_array($validatedData['properties_data'])) {
+                $bid->properties_data = $validatedData['properties_data'];
+            }
 
             if ($bid->save()) {
                 // جلب معلومات المستخدم الذي قام بنشر المزايدة
                 $user = Auth::user();
 
+                // تنسيق بيانات الخصائص لإضافة أسماء الخصائص
+                $formattedPropertiesData = [];
+                if (!empty($bid->properties_data)) {
+                    // جلب الخصائص المرتبطة
+                    $propertyIds = array_keys((array)$bid->properties_data);
+                    $properties = \App\Models\Property::whereIn('id', $propertyIds)->get()->keyBy('id');
+
+                    // تنسيق بيانات الخصائص للعرض
+                    foreach ((array)$bid->properties_data as $propertyId => $value) {
+                        if (isset($properties[$propertyId])) {
+                            $property = $properties[$propertyId];
+                            $formattedPropertiesData[$propertyId] = [
+                                'name' => $property->name,
+                                'type' => $property->type,
+                                'value' => $value,
+                                'type_text' => $this->getPropertyTypeText($property->type),
+                            ];
+                        }
+                    }
+                }
+
+                // إنشاء نسخة من الكائن للاستجابة
+                $bidResponse = $bid->toArray();
+                $bidResponse['formatted_properties'] = $formattedPropertiesData;
+
                 return response()->json([
                     'message' => 'تم إنشاء المزاد بنجاح',
-                    'bid' => $bid,
+                    'bid' => $bidResponse,
                     'user' => [
                         'id' => $user->id,
                         'name' => $user->name,
@@ -97,6 +152,20 @@ class BidsController extends Controller
                 return response()->json(['message' => 'فشل في إنشاء المزاد'], 500);
             }
         } catch (\Exception $e) {
+            // تسجيل الخطأ للتحقق منه لاحقًا
+            \Illuminate\Support\Facades\Log::error('Error creating bid: ' . $e->getMessage(), [
+                'request_data' => $request->all(),
+                'exception' => $e
+            ]);
+
+            // التحقق من نوع الخطأ وتقديم رسالة مناسبة
+            if ($e instanceof \Illuminate\Validation\ValidationException) {
+                return response()->json([
+                    'message' => 'خطأ في التحقق من البيانات',
+                    'errors' => $e->errors()
+                ], 422);
+            }
+
             return response()->json(['message' => 'حدث خطأ أثناء إنشاء المزاد: ' . $e->getMessage()], 500);
         }
     }
@@ -132,9 +201,38 @@ class BidsController extends Controller
             // تضمين حالة المنتج في الاستجابة
             $bid->product_condition_text = $bid->product_condition === 'new' ? 'جديد' : 'مستخدم';
 
+            // تضمين منشأ المنتج في الاستجابة
+            $bid->product_origin_text = $bid->product_origin;
+
             // تضمين الألوان والأحجام المتاحة
             $bid->available_colors_text = is_array($bid->available_colors) ? implode(', ', $bid->available_colors) : null;
             $bid->available_sizes_text = is_array($bid->available_sizes) ? implode(', ', $bid->available_sizes) : null;
+
+            // تضمين بيانات الخصائص
+            if (!empty($bid->properties_data)) {
+                // جلب الخصائص المرتبطة
+                $propertyIds = array_keys((array)$bid->properties_data);
+                $properties = \App\Models\Property::whereIn('id', $propertyIds)->get()->keyBy('id');
+
+                // تنسيق بيانات الخصائص للعرض
+                $formattedProperties = [];
+                foreach ((array)$bid->properties_data as $propertyId => $value) {
+                    if (isset($properties[$propertyId])) {
+                        $property = $properties[$propertyId];
+                        $formattedProperties[] = [
+                            'id' => $propertyId,
+                            'name' => $property->name,
+                            'type' => $property->type,
+                            'value' => $value,
+                            'type_text' => $this->getPropertyTypeText($property->type),
+                        ];
+                    }
+                }
+
+                $bid->formatted_properties = $formattedProperties;
+            } else {
+                $bid->formatted_properties = [];
+            }
 
             // لا حاجة لإعادة تعيين parent_id، لأنه موجود بالفعل في النموذج
             // وستتم إعادته تلقائيًا في استجابة JSON
@@ -493,6 +591,24 @@ class BidsController extends Controller
     {
         $categories = Category::all(['id', 'name']);
         return response()->json($categories);
+    }
+
+    /**
+     * الحصول على النص العربي لنوع الخاصية
+     *
+     * @param string $type
+     * @return string
+     */
+    private function getPropertyTypeText($type)
+    {
+        return match ($type) {
+            'text' => 'نص',
+            'select' => 'قائمة منسدلة',
+            'multiselect' => 'قائمة متعددة الاختيارات',
+            'number' => 'رقم',
+            'boolean' => 'نعم/لا',
+            default => $type,
+        };
     }
     public function getBidsEndingSoon($period)
     {

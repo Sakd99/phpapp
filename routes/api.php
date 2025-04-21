@@ -8,6 +8,8 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BannerController;
 use App\Http\Controllers\BidsController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\PaymentMethodController;
+use App\Http\Controllers\PropertyController;
 use App\Http\Controllers\UsersController;
 use App\Http\Controllers\AddressController;
 
@@ -20,6 +22,13 @@ Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:sanc
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/user/update-profile', [UsersController::class, 'updateProfile']); // مسار تحديث بيانات المستخدم
+
+    // مسارات طرق الدفع
+    Route::get('/payment-methods', [PaymentMethodController::class, 'index']);
+    Route::post('/payment-methods', [PaymentMethodController::class, 'store']);
+    Route::get('/payment-methods/{id}', [PaymentMethodController::class, 'show']);
+    Route::put('/payment-methods/{id}', [PaymentMethodController::class, 'update']);
+    Route::delete('/payment-methods/{id}', [PaymentMethodController::class, 'destroy']);
 });
 
 // مسارات البانرات
@@ -75,4 +84,8 @@ Route::middleware('auth:sanctum')->group(function () {
 });
 Route::get('/home-banners', [HomeBannerController::class, 'getHomeBanners']);
 Route::post('/home-banners', [HomeBannerController::class, 'store']);
+
+// مسارات الخصائص
+Route::get('/properties', [PropertyController::class, 'getActiveProperties']);
+Route::get('/properties/{id}', [PropertyController::class, 'getProperty']);
 

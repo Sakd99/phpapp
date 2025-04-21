@@ -49,6 +49,7 @@ class AdminPanelProvider extends PanelProvider
             ->navigationGroups([
                 'إدارة المحتوى',
                 'إدارة المبيعات',
+                'إدارة المزايدات',
                 'إدارة المستخدمين',
                 'التقارير والإحصائيات',
                 'الإعدادات'

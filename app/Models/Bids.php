@@ -29,11 +29,13 @@ class Bids extends Model
         'governorate',
         'region',
         'product_condition',
+        'product_origin', // منشأ المنتج (اسم الدولة)
         'status',
         'delivery_address',
         'fcm_token',
         'available_colors', // الألوان المتاحة للمنتج
         'available_sizes', // الأحجام المتاحة للمنتج
+        'properties_data', // بيانات الخصائص المخزنة كـ JSON
     ];
 
     /**
@@ -93,6 +95,16 @@ class Bids extends Model
     public function orders()
     {
         return $this->hasMany(Orders::class, 'bid_id');
+    }
+
+    /**
+     * الخصائص المرتبطة بالمزايدة
+     */
+    public function properties()
+    {
+        return $this->belongsToMany(Property::class, 'bid_property', 'bid_id', 'property_id')
+            ->withPivot('value')
+            ->withTimestamps();
     }
 
     public function routeNotificationForOneSignal()
@@ -223,6 +235,40 @@ class Bids extends Model
     public function setAvailableSizesAttribute($value)
     {
         $this->attributes['available_sizes'] = is_array($value) ? json_encode($value) : $value;
+    }
+
+    /**
+     * الحصول على بيانات الخصائص
+     *
+     * @param  string|null  $value
+     * @return array
+     */
+    public function getPropertiesDataAttribute($value)
+    {
+        return $value ? json_decode($value, true) : [];
+    }
+
+    /**
+     * تعيين بيانات الخصائص
+     *
+     * @param  array|string  $value
+     * @return void
+     */
+    public function setPropertiesDataAttribute($value)
+    {
+        $this->attributes['properties_data'] = is_array($value) ? json_encode($value) : $value;
+    }
+
+    /**
+     * الحصول على قيمة خاصية محددة
+     *
+     * @param  int  $propertyId
+     * @return mixed|null
+     */
+    public function getPropertyValue($propertyId)
+    {
+        $propertiesData = $this->properties_data;
+        return $propertiesData[$propertyId] ?? null;
     }
 
 

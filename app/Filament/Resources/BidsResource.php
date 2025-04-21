@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\BidsResource\Pages;
 use App\Models\Bids;
 use App\Models\Category;
+use App\Models\Property;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -23,7 +24,7 @@ class BidsResource extends Resource
     protected static ?string $slug = 'bids';
 
     protected static ?string $pluralLabel = 'المزايدات';
-    protected static ?string $navigationGroup = 'إدارة المبيعات';
+    protected static ?string $navigationGroup = 'إدارة المزايدات';
     protected static ?int $navigationSort = 2;
     protected static ?string $navigationIcon = 'heroicon-o-tag';
     protected static ?string $recordTitleAttribute = 'product_name';
@@ -80,6 +81,14 @@ class BidsResource extends Resource
                         'rejected' => 'مرفوض',
                     ])
                     ->required(),
+                Forms\Components\Select::make('product_condition')
+                    ->label('حالة المنتج')
+                    ->options([
+                        'new' => 'جديد',
+                        'used' => 'مستعمل',
+                    ])
+                    ->default('new')
+                    ->required(),
                 ])->columns(2),
 
                 Forms\Components\Section::make('صور المنتج')
@@ -133,6 +142,12 @@ class BidsResource extends Resource
                 Forms\Components\TextInput::make('shipping_address')
                     ->label('عنوان الشحن')
                     ->maxLength(255),
+                Forms\Components\TextInput::make('product_origin')
+                    ->label('منشأ المنتج (اسم الدولة)')
+                    ->placeholder('مثال: العراق، الصين، اليابان، إلخ')
+                    ->default('العراق')
+                    ->required()
+                    ->maxLength(255),
                 Forms\Components\Placeholder::make('created_at')
                     ->label('تاريخ الإنشاء')
                     ->content(fn(?Bids $record): string => $record?->created_at?->diffForHumans() ?? '-'),
@@ -141,28 +156,72 @@ class BidsResource extends Resource
                     ->content(fn(?Bids $record): string => $record?->updated_at?->diffForHumans() ?? '-'),
                 ])->columns(2),
 
-                Forms\Components\Section::make('الألوان والأحجام المتاحة')
-                ->description('أدخل الألوان والأحجام المتاحة للمنتج')
-                ->schema([
-                    Forms\Components\TagsInput::make('available_colors')
-                        ->label('الألوان المتاحة')
-                        ->placeholder('أدخل اللون واضغط Enter')
-                        ->helperText('أدخل كل لون واضغط Enter لإضافة لون جديد')
-                        ->nestedRecursiveRules([
-                            'min:1',
-                            'max:255',
-                        ])
-                        ->columnSpanFull(),
-                    Forms\Components\TagsInput::make('available_sizes')
-                        ->label('الأحجام المتاحة')
-                        ->placeholder('أدخل الحجم واضغط Enter')
-                        ->helperText('أدخل كل حجم واضغط Enter لإضافة حجم جديد')
-                        ->nestedRecursiveRules([
-                            'min:1',
-                            'max:255',
-                        ])
-                        ->columnSpanFull(),
-                ])->collapsible(),
+                Forms\Components\Section::make('خصائص المنتج')
+                ->description('اختر الخصائص المناسبة للمنتج')
+                ->schema(function () {
+                    // جلب جميع الخصائص النشطة
+                    $properties = Property::where('is_active', true)->get();
+
+                    // إنشاء حقول ديناميكية لكل خاصية
+                    $fields = [];
+
+                    foreach ($properties as $property) {
+                        // إنشاء حقل مناسب بناءً على نوع الخاصية
+                        $field = null;
+
+                        switch ($property->type) {
+                            case 'text':
+                                $field = Forms\Components\TextInput::make('property_' . $property->id)
+                                    ->label($property->name)
+                                    ->required($property->is_required)
+                                    ->maxLength(255);
+                                break;
+
+                            case 'select':
+                                $field = Forms\Components\Select::make('property_' . $property->id)
+                                    ->label($property->name)
+                                    ->options(collect($property->options)->mapWithKeys(fn ($option) => [$option => $option]))
+                                    ->required($property->is_required);
+                                break;
+
+                            case 'multiselect':
+                                $field = Forms\Components\Select::make('property_' . $property->id)
+                                    ->label($property->name)
+                                    ->multiple()
+                                    ->options(collect($property->options)->mapWithKeys(fn ($option) => [$option => $option]))
+                                    ->required($property->is_required);
+                                break;
+
+                            case 'number':
+                                $field = Forms\Components\TextInput::make('property_' . $property->id)
+                                    ->label($property->name)
+                                    ->numeric()
+                                    ->required($property->is_required);
+                                break;
+
+                            case 'boolean':
+                                $field = Forms\Components\Toggle::make('property_' . $property->id)
+                                    ->label($property->name)
+                                    ->required($property->is_required);
+                                break;
+                        }
+
+                        if ($field) {
+                            $fields[] = $field;
+                        }
+                    }
+
+                    // إذا لم تكن هناك خصائص، أضف رسالة توضيحية
+                    if (empty($fields)) {
+                        $fields[] = Forms\Components\Placeholder::make('no_properties')
+                            ->label('لا توجد خصائص')
+                            ->content('لم يتم إنشاء أي خصائص بعد. يمكنك إنشاء خصائص من قسم الخصائص في لوحة التحكم.');
+                    }
+
+                    return $fields;
+                })
+                ->columns(2)
+                ->collapsible(),
             ]);
     }
 
@@ -236,20 +295,11 @@ class BidsResource extends Resource
                     ->label('عنوان الشحن')
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('available_colors')
-                    ->label('الألوان')
-                    ->formatStateUsing(function ($state) {
-                        if (empty($state) || !is_array($state)) return '-';
-                        return implode(', ', $state);
-                    })
-                    ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('available_sizes')
-                    ->label('الأحجام')
-                    ->formatStateUsing(function ($state) {
-                        if (empty($state) || !is_array($state)) return '-';
-                        return implode(', ', $state);
-                    })
-                    ->toggleable(isToggledHiddenByDefault: true),
+                Tables\Columns\TextColumn::make('properties_count')
+                    ->label('عدد الخصائص')
+                    ->counts('properties')
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: false),
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('تاريخ الإنشاء')
                     ->sortable()
@@ -328,6 +378,24 @@ class BidsResource extends Resource
     public static function mutateFormDataBeforeSave(array $data): array
     {
         $data['user_id'] = Auth::id();
+
+        // استخراج بيانات الخصائص من النموذج
+        $propertyData = [];
+        $properties = Property::where('is_active', true)->get();
+
+        foreach ($properties as $property) {
+            $key = 'property_' . $property->id;
+
+            if (isset($data[$key])) {
+                $propertyData[$property->id] = $data[$key];
+                // إزالة البيانات من مصفوفة البيانات الأصلية
+                unset($data[$key]);
+            }
+        }
+
+        // تخزين بيانات الخصائص في حقل JSON
+        $data['properties_data'] = json_encode($propertyData);
+
         return $data;
     }
 }
